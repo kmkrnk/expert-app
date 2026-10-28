@@ -112,7 +112,8 @@
   function viewHome() {
     var P = C.profile;
     var promo = C.promo;
-    var pp = product(promo.product);
+    var events = C.events || [];
+    var firstReview = C.reviews && C.reviews.text[0];
     var quick = C.quick.map(function (q) {
       return '<button class="quick__item" data-action="' + esc(q.action) + '"><span class="quick__icon">' + icon(q.icon) + '</span>' +
         '<span class="quick__t">' + esc(q.title) + '</span><span class="quick__s">' + esc(q.subtitle) + '</span></button>';
@@ -125,28 +126,28 @@
         '<img class="hero__avatar" src="' + esc(img(P.avatar)) + '" alt="' + esc(P.name) + '">' +
         '<h1 class="hero__name">' + esc(P.name) + '</h1>' +
         '<div class="hero__role">' + esc(P.role) + '</div>' +
-        '<p class="hero__tagline">' + esc(P.tagline) + '</p>' +
-        '<div class="badges">' + P.badges.map(function (b) { return '<span class="badge">' + esc(b) + '</span>'; }).join('') + '</div>' +
+        (P.tagline ? '<p class="hero__tagline">' + esc(P.tagline) + '</p>' : '') +
+        (P.badges.length ? '<div class="badges">' + P.badges.map(function (b) { return '<span class="badge">' + esc(b) + '</span>'; }).join('') + '</div>' : '') +
         '<div class="stats">' + P.stats.map(function (s) { return '<div class="stat"><div class="stat__v">' + esc(s.value) + '</div><div class="stat__l">' + esc(s.label) + '</div></div>'; }).join('') + '</div>' +
       '</header>' +
 
-      '<div class="section"><button class="promo" data-buy="' + esc(pp.id) + '">' +
+      (promo ? '<div class="section"><button class="promo" data-buy="' + esc(promo.product) + '">' +
         '<span class="promo__tag">' + esc(promo.tag) + '</span>' +
         '<div class="promo__title">' + esc(promo.title) + '</div>' +
         '<div class="promo__text">' + esc(promo.text) + '</div>' +
         '<div class="promo__row"><div class="promo__price">' + money(promo.price) + (promo.oldPrice ? '<s>' + money(promo.oldPrice) + '</s>' : '') + '</div>' +
         '<span class="promo__btn">' + esc(promo.button) + '</span></div>' +
-      '</button></div>' +
+      '</button></div>' : '') +
 
       '<div class="section">' + sectionHead('Начните с этого', 'Чем могу помочь') + '<div class="quick">' + quick + '</div></div>' +
 
-      '<div class="section">' + sectionHead('Расписание', 'Ближайшие события') +
-        '<div class="card">' + C.events.map(eventRow).join('') + '</div></div>' +
+      (events.length ? '<div class="section">' + sectionHead('Расписание', 'Ближайшие события') +
+        '<div class="card">' + events.map(eventRow).join('') + '</div></div>' : '') +
 
       '<div class="section">' + sectionHead('Бесплатно', 'Популярные разборы', 'free') +
         '<div class="hscroll">' + top.map(function (p) { return postCard(p); }).join('') + '</div></div>' +
 
-      '<div class="section">' + sectionHead('Отзывы', 'Результаты учеников', 'reviews') + reviewCard(C.reviews.text[0]) + '</div>' +
+      (firstReview ? '<div class="section">' + sectionHead('Отзывы', 'Результаты учеников', 'reviews') + reviewCard(firstReview) + '</div>' : '') +
 
       '<div class="section">' + sectionHead('Связь', 'Я на связи') + '<div class="contacts">' +
         C.contacts.map(function (c) {
@@ -183,23 +184,27 @@
                 '<button class="btn" data-buy="' + esc(p.id) + '">' + esc(p.button || 'Купить') + '</button></div>'
             // Цена ещё не объявлена — собираем предзапись
             : '<div class="product__foot"><div class="price"><small>Предзапись открыта</small></div>' +
-                '<button class="btn" data-action="lead:' + esc('Курс «' + p.title + '»') + '">' + esc(p.button || 'Записаться') + '</button></div>') +
+                '<button class="btn" data-action="lead:' + esc(p.leadTopic || p.title) + '">' + esc(p.button || 'Записаться') + '</button></div>') +
         '</div>';
       }).join('') + '</div>';
   }
 
   function viewReviews() {
+    var R = C.reviews || { text: [], shots: [] };
+    if (!R.text.length && !R.shots.length && !R.more) {
+      return '<div class="page-title"><div class="eyebrow">Отзывы</div><h1>' + esc(C.reviewsTitle) + '</h1></div><p class="empty">Здесь будут отзывы учеников</p>';
+    }
     return '<div class="page-title"><div class="eyebrow">Отзывы</div><h1>' + esc(C.reviewsTitle) + '</h1><p>' + esc(C.reviewsText) + '</p></div>' +
-      '<div class="section" style="margin-top:16px"><div class="reviews">' + C.reviews.text.map(reviewCard).join('') + '</div></div>' +
-      '<div class="section">' + sectionHead('Из чата Клуба', 'Сообщения участников') +
-        '<div class="shots">' + C.reviews.shots.map(function (s) { return '<div class="shot"><img src="' + esc(img(s)) + '" alt="Отзыв" loading="lazy"></div>'; }).join('') + '</div></div>' +
-      '<div class="section"><button class="btn btn--ghost btn--block" data-link="' + esc(C.reviews.more) + '">Все отзывы в Telegram</button></div>';
+      (R.text.length ? '<div class="section" style="margin-top:16px"><div class="reviews">' + R.text.map(reviewCard).join('') + '</div></div>' : '') +
+      (R.shots.length ? '<div class="section">' + sectionHead(R.shotsEyebrow || 'Скриншоты', R.shotsTitle || 'Сообщения учеников') +
+        '<div class="shots">' + R.shots.map(function (s) { return '<div class="shot"><img src="' + esc(img(s)) + '" alt="Отзыв" loading="lazy"></div>'; }).join('') + '</div></div>' : '') +
+      (R.more ? '<div class="section"><button class="btn btn--ghost btn--block" data-link="' + esc(R.more) + '">Все отзывы в Telegram</button></div>' : '');
   }
 
   var TABS = [
     { id: 'home', name: 'Главная', icon: 'home', render: viewHome },
     { id: 'free', name: 'Бесплатно', icon: 'play', render: viewFree },
-    { id: 'shop', name: 'Клуб и курсы', icon: 'bag', render: viewProducts },
+    { id: 'shop', name: C.shopTab || 'Продукты', icon: 'bag', render: viewProducts },
     { id: 'reviews', name: 'Отзывы', icon: 'star', render: viewReviews }
   ];
 
@@ -268,7 +273,7 @@
 
   function buySheet(id) {
     var p = product(id);
-    if (!p.tariffs[0].price) { leadSheet('Курс «' + p.title + '»'); return; }
+    if (!p.tariffs[0].price) { leadSheet(p.leadTopic || p.title); return; }
     var sel = 0;
     function draw() {
       var t = p.tariffs[sel];

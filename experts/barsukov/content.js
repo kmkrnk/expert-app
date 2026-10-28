@@ -43,6 +43,7 @@ window.EXPERT = {
     "button": "Начать"
   },
   "fab": "Записаться на консультацию",
+  "shopTab": "Клуб и курсы",
   "quick": [
     {
       "icon": "heart",
@@ -373,6 +374,7 @@ window.EXPERT = {
       "id": "nogi",
       "kind": "Курс · старт 9 ноября",
       "title": "Лёгкие ноги",
+      "leadTopic": "Курс «Лёгкие ноги»",
       "badge": "Скоро старт",
       "button": "Записаться",
       "subtitle": "Колени, стопы и тазобедренные суставы: снять перегрузку и остановить износ",
@@ -427,6 +429,8 @@ window.EXPERT = {
       "img/rev-263.jpg",
       "img/rev-264.jpg"
     ],
+    "shotsEyebrow": "Из чата Клуба",
+    "shotsTitle": "Сообщения участников",
     "more": "https://t.me/healthyogaclub"
   },
   "lead": {
